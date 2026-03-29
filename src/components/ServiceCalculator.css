@@ -1,0 +1,274 @@
+.service-calc-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 12px;
+  padding: 28px 28px 24px;
+}
+
+.card-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.8);
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.card-title i { color: #667eea; }
+
+.services-sublabel {
+  font-size: 11px;
+  color: rgba(255,255,255,0.35);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Each hourly service is a self-contained block */
+.hourly-service-block {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 10px;
+  padding: 18px 18px 14px;
+  margin-bottom: 14px;
+}
+
+/* Top row: type, description, hours, rate */
+.service-row {
+  display: grid;
+  grid-template-columns: 2fr 2fr 0.7fr 0.7fr;
+  gap: 12px;
+  align-items: end;
+  margin-bottom: 14px;
+}
+
+/* Notes row — full width inside the block */
+.notes-row {
+  width: 100%;
+}
+.notes-row .form-group { margin: 0; }
+
+/* Delete — below additional details */
+.hourly-service-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 4px;
+}
+
+/* LINE ITEM ROW */
+.lineitem-row {
+  display: grid;
+  grid-template-columns: 2fr 0.6fr 0.8fr 36px;
+  gap: 12px;
+  align-items: end;
+  margin-bottom: 12px;
+  padding: 18px 18px 14px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 10px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+}
+
+/* Line item row: align delete with inputs */
+.remove-col {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.form-label {
+  font-size: 11px;
+  color: rgba(255,255,255,0.35);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  white-space: nowrap;
+}
+
+.optional {
+  text-transform: none;
+  font-size: 10px;
+  letter-spacing: 0;
+  color: rgba(255,255,255,0.2);
+}
+
+.form-input {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 7px;
+  color: #fff;
+  padding: 9px 12px;
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+  width: 100%;
+  transition: border-color 0.2s;
+}
+.form-input:focus { border-color: rgba(102,126,234,0.5); }
+.form-input::placeholder { color: rgba(255,255,255,0.2); }
+
+.form-select {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 7px;
+  color: rgba(255,255,255,0.7);
+  padding: 9px 12px;
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+  width: 100%;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+.form-select:focus { border-color: rgba(102,126,234,0.5); }
+.form-select option,
+.form-select optgroup { background: #1a1a2e; color: #fff; }
+
+.btn-remove {
+  background: rgba(241,70,104,0.1);
+  border: 1px solid rgba(241,70,104,0.2);
+  color: #f14668;
+  width: 34px;
+  height: 34px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+.btn-remove:hover { background: rgba(241,70,104,0.22); }
+
+/* ADD BUTTONS */
+.add-btns {
+  display: flex;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.btn-add-service,
+.btn-add-line {
+  padding: 9px 18px;
+  border-radius: 7px;
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+
+.btn-add-service {
+  background: rgba(102,126,234,0.1);
+  border: 1px dashed rgba(102,126,234,0.35);
+  color: #667eea;
+}
+.btn-add-service:hover { background: rgba(102,126,234,0.18); }
+
+.btn-add-line {
+  background: rgba(255,255,255,0.04);
+  border: 1px dashed rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.4);
+}
+.btn-add-line:hover { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.6); }
+
+@media (max-width: 900px) {
+  .service-row { grid-template-columns: 1fr 1fr; }
+  .lineitem-row { grid-template-columns: 1fr 1fr; }
+}
+/* ── Material autocomplete — append to ServiceCalculator.css ─────────────────
+   These are the ONLY new rules. Nothing above this comment is changed.       */
+
+/* Wrapper gives the dropdown a positioning context */
+.desc-autocomplete-wrap {
+  position: relative;
+  width: 100%;
+}
+
+/* Dropdown panel */
+.material-suggestions {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 200;
+  background: #1a1a2e;
+  border: 1px solid rgba(102, 126, 234, 0.35);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  overflow: hidden;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+/* Section headers ("Recently used", "Materials") */
+.suggestions-group-label {
+  padding: 6px 12px 4px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.35);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  pointer-events: none;
+}
+
+/* Thin divider between recent + matches sections */
+.suggestions-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.07);
+  margin: 4px 0;
+}
+
+/* Individual suggestion row */
+.suggestion-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 8px 12px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.12s;
+  gap: 8px;
+}
+
+.suggestion-item:hover {
+  background: rgba(102, 126, 234, 0.12);
+}
+
+.suggestion-item:active {
+  background: rgba(102, 126, 234, 0.2);
+}
+
+.suggestion-label {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.85);
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.suggestion-price {
+  font-size: 12px;
+  font-weight: 600;
+  color: #667eea;
+  flex-shrink: 0;
+  font-family: monospace;
+}
