@@ -1,12 +1,9 @@
 {
-  "_comment": "NOTE: Website hosting is done via GitHub Pages, not Firebase Hosting. Firebase is only used for Functions (email backend), Firestore (database), and Authentication.",
-  "hosting": {
-    "public": "public",
-    "ignore": [
-      "firebase.json",
-      "**/.*",
-      "**/node_modules/**"
-    ]
+  "firestore": {
+    "database": "(default)",
+    "location": "nam5",
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
   },
   "functions": [
     {
@@ -21,5 +18,8 @@
         "*.local"
       ]
     }
-  ]
+  ],
+  "auth": {
+    "providers": {}
+  }
 }

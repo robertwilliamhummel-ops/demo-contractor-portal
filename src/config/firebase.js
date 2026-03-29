@@ -4,12 +4,12 @@ import { getFirestore } from 'firebase/firestore';
 import { getFunctions } from 'firebase/functions';
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAXjjNSClbsrtmMAbB_KuOEX8EnOn5N_0k",
-  authDomain: "techflow-website-2026.firebaseapp.com",
-  projectId: "techflow-website-2026",
-  storageBucket: "techflow-website-2026.firebasestorage.app",
-  messagingSenderId: "904705508663",
-  appId: "1:904705508663:web:f1847a3d6d86abaa5e46b2"
+  apiKey: "AIzaSyDliZdpmyMDceJKITBBdNKVamjwNW8Z8Z0",
+  authDomain: "techflow-demo-portal.firebaseapp.com",
+  projectId: "techflow-demo-portal",
+  storageBucket: "techflow-demo-portal.firebasestorage.app",
+  messagingSenderId: "36415340966",
+  appId: "1:36415340966:web:777eafe5c8b0c3b600cf67"
 };
 
 const app = initializeApp(firebaseConfig);
