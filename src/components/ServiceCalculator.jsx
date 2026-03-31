@@ -3,210 +3,672 @@ import { roundToTwo } from '../utils/formatters';
 import './ServiceCalculator.css';
 
 /**
- * MSP-style service catalog: granular types with default rates + presets keyed by `value`.
- * Description dropdown is filtered by selected service type; changing type clears the preset.
+ * Construction & Renovation service catalog
+ * Granular service types with default rates + presets keyed by `value`.
  */
 const SERVICE_TYPES = [
-  // IT Services
-  { value: 'it-remote', label: 'Remote IT support (business hours)', rate: 100, group: 'IT Services' },
-  { value: 'it-onsite', label: 'On-site IT support', rate: 110, group: 'IT Services' },
-  { value: 'it-afterhours', label: 'After-hours / priority support', rate: 155, group: 'IT Services' },
-  { value: 'it-emergency', label: 'Emergency / rush response', rate: 185, group: 'IT Services' },
-  { value: 'it-network', label: 'Network & infrastructure (project)', rate: 130, group: 'IT Services' },
-  { value: 'it-m365', label: 'Microsoft 365 / cloud identity', rate: 120, group: 'IT Services' },
-  { value: 'it-backup', label: 'Backup & disaster recovery', rate: 130, group: 'IT Services' },
-  { value: 'it-security', label: 'Security hardening & endpoint', rate: 140, group: 'IT Services' },
-  // Business automation
-  { value: 'auto-workflow', label: 'Automation — workflows & integrations', rate: 150, group: 'Business automation' },
-  { value: 'auto-data', label: 'Automation — data sync & APIs', rate: 160, group: 'Business automation' },
-  // Web, email & hosting
-  { value: 'web-build', label: 'Website — design & build', rate: 115, group: 'Web, email & hosting' },
-  { value: 'web-care', label: 'Website — maintenance & updates', rate: 95, group: 'Web, email & hosting' },
-  { value: 'email-hosting', label: 'Email & collaboration setup', rate: 125, group: 'Web, email & hosting' },
-  { value: 'hosting-dns', label: 'Hosting, DNS & domain management', rate: 105, group: 'Web, email & hosting' },
-  { value: 'web-ecom', label: 'E-commerce & payments', rate: 145, group: 'Web, email & hosting' },
+  // Painting
+  { value: 'paint-interior', label: 'Interior Painting', rate: 65, group: 'Painting' },
+  { value: 'paint-exterior', label: 'Exterior Painting', rate: 70, group: 'Painting' },
+  { value: 'paint-cabinet', label: 'Cabinet & Furniture Painting', rate: 75, group: 'Painting' },
+  { value: 'paint-deck', label: 'Deck & Fence Staining / Painting', rate: 65, group: 'Painting' },
+  { value: 'paint-epoxy', label: 'Epoxy Floor Coating', rate: 80, group: 'Painting' },
+
+  // Drywall & Plastering
+  { value: 'drywall-install', label: 'Drywall Installation', rate: 70, group: 'Drywall & Plastering' },
+  { value: 'drywall-tape', label: 'Drywall Taping & Mudding', rate: 65, group: 'Drywall & Plastering' },
+  { value: 'drywall-repair', label: 'Drywall Repair & Patching', rate: 60, group: 'Drywall & Plastering' },
+  { value: 'plaster-repair', label: 'Plaster Repair & Skim Coat', rate: 75, group: 'Drywall & Plastering' },
+  { value: 'texture-apply', label: 'Texture Application', rate: 70, group: 'Drywall & Plastering' },
+
+  // Framing & Structural
+  { value: 'frame-interior', label: 'Interior Framing', rate: 75, group: 'Framing & Structural' },
+  { value: 'frame-exterior', label: 'Exterior Framing', rate: 80, group: 'Framing & Structural' },
+  { value: 'frame-basement', label: 'Basement Framing', rate: 75, group: 'Framing & Structural' },
+  { value: 'frame-addition', label: 'Addition / Extension Framing', rate: 85, group: 'Framing & Structural' },
+  { value: 'steel-stud', label: 'Steel Stud Framing', rate: 80, group: 'Framing & Structural' },
+
+  // Flooring
+  { value: 'floor-hardwood', label: 'Hardwood Flooring Installation', rate: 70, group: 'Flooring' },
+  { value: 'floor-laminate', label: 'Laminate Flooring Installation', rate: 55, group: 'Flooring' },
+  { value: 'floor-vinyl', label: 'Vinyl Plank / LVP Installation', rate: 55, group: 'Flooring' },
+  { value: 'floor-tile', label: 'Floor Tile Installation', rate: 75, group: 'Flooring' },
+  { value: 'floor-carpet', label: 'Carpet Installation', rate: 50, group: 'Flooring' },
+  { value: 'floor-subfloor', label: 'Subfloor Repair & Leveling', rate: 65, group: 'Flooring' },
+  { value: 'floor-refinish', label: 'Hardwood Sanding & Refinishing', rate: 75, group: 'Flooring' },
+
+  // Tiling
+  { value: 'tile-bathroom', label: 'Bathroom Tile Installation', rate: 80, group: 'Tiling' },
+  { value: 'tile-kitchen', label: 'Kitchen Backsplash Tile', rate: 75, group: 'Tiling' },
+  { value: 'tile-shower', label: 'Shower / Tub Surround Tile', rate: 85, group: 'Tiling' },
+  { value: 'tile-repair', label: 'Tile Repair & Regrouting', rate: 65, group: 'Tiling' },
+  { value: 'tile-outdoor', label: 'Outdoor / Patio Tile', rate: 80, group: 'Tiling' },
+
+  // Demolition
+  { value: 'demo-interior', label: 'Interior Demolition', rate: 75, group: 'Demolition' },
+  { value: 'demo-drywall', label: 'Drywall Removal', rate: 65, group: 'Demolition' },
+  { value: 'demo-flooring', label: 'Flooring / Tile Removal', rate: 60, group: 'Demolition' },
+  { value: 'demo-kitchen', label: 'Kitchen / Bathroom Demolition', rate: 80, group: 'Demolition' },
+  { value: 'demo-concrete', label: 'Concrete Breaking & Removal', rate: 95, group: 'Demolition' },
+
+  // Decking & Fencing
+  { value: 'deck-build', label: 'Deck Construction', rate: 80, group: 'Decking & Fencing' },
+  { value: 'deck-repair', label: 'Deck Repair & Refinishing', rate: 70, group: 'Decking & Fencing' },
+  { value: 'fence-install', label: 'Fence Installation', rate: 70, group: 'Decking & Fencing' },
+  { value: 'fence-repair', label: 'Fence Repair', rate: 65, group: 'Decking & Fencing' },
+  { value: 'pergola', label: 'Pergola / Gazebo Construction', rate: 85, group: 'Decking & Fencing' },
+
+  // Roofing & Eavestroughs
+  { value: 'roof-shingles', label: 'Shingle Roof Installation', rate: 90, group: 'Roofing & Eavestroughs' },
+  { value: 'roof-repair', label: 'Roof Repair & Patching', rate: 85, group: 'Roofing & Eavestroughs' },
+  { value: 'roof-flat', label: 'Flat Roof / Membrane', rate: 95, group: 'Roofing & Eavestroughs' },
+  { value: 'eaves-install', label: 'Eavestrough Installation', rate: 75, group: 'Roofing & Eavestroughs' },
+  { value: 'eaves-repair', label: 'Eavestrough Repair & Cleaning', rate: 65, group: 'Roofing & Eavestroughs' },
+  { value: 'soffit-fascia', label: 'Soffit & Fascia Installation', rate: 75, group: 'Roofing & Eavestroughs' },
+
+  // Windows & Doors
+  { value: 'window-install', label: 'Window Installation / Replacement', rate: 80, group: 'Windows & Doors' },
+  { value: 'door-install', label: 'Door Installation / Replacement', rate: 75, group: 'Windows & Doors' },
+  { value: 'door-trim', label: 'Door & Window Trim / Casing', rate: 65, group: 'Windows & Doors' },
+  { value: 'caulk-seal', label: 'Caulking & Weather Sealing', rate: 60, group: 'Windows & Doors' },
+
+  // Insulation
+  { value: 'insul-batt', label: 'Batt Insulation Installation', rate: 65, group: 'Insulation' },
+  { value: 'insul-spray', label: 'Spray Foam Insulation', rate: 90, group: 'Insulation' },
+  { value: 'insul-rigid', label: 'Rigid Board Insulation', rate: 70, group: 'Insulation' },
+  { value: 'vapour-barrier', label: 'Vapour Barrier Installation', rate: 60, group: 'Insulation' },
+
+  // Concrete & Masonry
+  { value: 'concrete-pour', label: 'Concrete Pouring & Forming', rate: 95, group: 'Concrete & Masonry' },
+  { value: 'concrete-repair', label: 'Concrete Repair & Resurfacing', rate: 85, group: 'Concrete & Masonry' },
+  { value: 'brick-install', label: 'Brick / Block Laying', rate: 90, group: 'Concrete & Masonry' },
+  { value: 'mortar-repair', label: 'Mortar / Tuckpointing Repair', rate: 80, group: 'Concrete & Masonry' },
+  { value: 'interlock', label: 'Interlock / Paving Stone', rate: 85, group: 'Concrete & Masonry' },
+
+  // Trim & Millwork
+  { value: 'trim-baseboard', label: 'Baseboard & Casing Installation', rate: 60, group: 'Trim & Millwork' },
+  { value: 'trim-crown', label: 'Crown Moulding Installation', rate: 70, group: 'Trim & Millwork' },
+  { value: 'trim-wainscot', label: 'Wainscoting & Wall Panels', rate: 75, group: 'Trim & Millwork' },
+  { value: 'shelving', label: 'Custom Shelving & Built-ins', rate: 80, group: 'Trim & Millwork' },
+  { value: 'stair-rail', label: 'Stair Railing & Baluster', rate: 85, group: 'Trim & Millwork' },
+
+  // General Labour
+  { value: 'labour-general', label: 'General Labour', rate: 55, group: 'General Labour' },
+  { value: 'labour-cleanup', label: 'Site Cleanup & Waste Removal', rate: 55, group: 'General Labour' },
+  { value: 'labour-supervision', label: 'Site Supervision / Project Management', rate: 95, group: 'General Labour' },
+  { value: 'labour-emergency', label: 'Emergency / Rush Response', rate: 130, group: 'General Labour' },
 ];
 
-/** Preset line wording per service type `value` (shown only when that type is selected). */
+/** Preset line wording per service type */
 const DESCRIPTION_OPTIONS = {
-  'it-remote': [
-    'Password reset & account unlock',
-    'Software & application troubleshooting',
-    'VPN & remote access assistance',
-    'Printer / peripheral configuration',
-    'General troubleshooting (service ticket)',
-    'Email client setup (Outlook, Apple Mail, etc.)',
-    'Mobile device setup & enrollment',
+  'paint-interior': [
+    'Interior wall painting (single room)',
+    'Interior wall painting (full unit)',
+    'Ceiling painting',
+    'Trim & baseboard painting',
+    'Doors & frames painting',
+    'Accent wall — feature colour',
+    'Touch-up & repairs after drywall',
   ],
-  'it-onsite': [
-    'Workstation setup / replacement',
-    'On-site troubleshooting & diagnostics',
-    'Network cabling / wall jack check',
-    'Wi-Fi / access point troubleshooting',
-    'New hire desk & hardware setup',
-    'Rack / patch panel tidy & labeling',
+  'paint-exterior': [
+    'Exterior siding painting',
+    'Exterior trim & soffit painting',
+    'Garage door painting',
+    'Foundation & basement exterior',
+    'Full exterior repaint',
   ],
-  'it-afterhours': [
-    'After-hours incident response',
-    'Scheduled maintenance window',
-    'Evening change window',
-    'Weekend / holiday coverage',
+  'paint-cabinet': [
+    'Kitchen cabinet painting (full set)',
+    'Upper cabinets only',
+    'Lower cabinets only',
+    'Furniture refinishing',
+    'Cabinet door & drawer face painting',
   ],
-  'it-emergency': [
-    'Production-down response',
-    'Security incident triage (initial)',
-    'Recovery coordination (initial assessment)',
-    'Critical path restoration',
+  'paint-deck': [
+    'Deck staining (full deck)',
+    'Fence staining / painting',
+    'Deck sealing & waterproofing',
+    'Pergola & outdoor structure staining',
   ],
-  'it-network': [
-    'Firewall / router configuration change',
-    'VLAN & Wi-Fi segmentation',
-    'Site-to-site VPN setup',
-    'Network assessment & documentation',
-    'Switch / access point deployment',
+  'paint-epoxy': [
+    'Garage floor epoxy coating',
+    'Basement floor epoxy coating',
+    'Commercial floor epoxy',
   ],
-  'it-m365': [
-    'User & license management (Microsoft 365)',
-    'SharePoint / Teams site setup',
-    'Groups & shared mailbox configuration',
-    'Email security (rules; SPF/DKIM with DNS)',
-    'Guest access & external sharing review',
-    'Intune / device compliance basics',
+  'drywall-install': [
+    'Drywall installation (full room)',
+    'Drywall installation (basement)',
+    'Ceiling drywall installation',
+    'Drywall on new framing',
+    'Moisture-resistant drywall (bathroom)',
+    'Fire-rated drywall installation',
   ],
-  'it-backup': [
-    'Backup job review & test restore',
-    'Backup tool deployment & tuning',
-    'Offsite / cloud backup configuration',
-    'Disaster recovery test & documentation',
+  'drywall-tape': [
+    'Taping & mudding (full room)',
+    'Taping & mudding (basement)',
+    'Ceiling taping & finishing',
+    'Corner bead & finishing',
+    'Level 4 / Level 5 finish',
   ],
-  'it-security': [
-    'MFA rollout (users & admin accounts)',
-    'Endpoint protection review',
-    'Patch management window',
-    'Admin account review & least privilege',
-    'Baseline security hardening',
+  'drywall-repair': [
+    'Small hole repair (under 6")',
+    'Large hole repair (over 6")',
+    'Water damage drywall repair',
+    'Corner damage repair',
+    'Ceiling crack repair',
+    'Multiple patch repairs',
   ],
-  'auto-workflow': [
-    'Power Automate flow (new or change)',
-    'Zapier / Make scenario',
-    'Approval & routing workflow',
-    'Email-to-ticket / CRM routing',
-    'Scheduled report automation',
+  'plaster-repair': [
+    'Skim coat over existing plaster',
+    'Plaster crack repair',
+    'Plaster resurfacing (full wall)',
+    'Venetian plaster application',
   ],
-  'auto-data': [
-    'CRM ↔ accounting sync',
-    'API / webhook integration',
-    'CSV import pipeline & validation',
-    'Custom connector / middleware',
-    'Error monitoring & retry logic',
+  'texture-apply': [
+    'Orange peel texture',
+    'Skip trowel texture',
+    'Knockdown texture',
+    'Smooth finish',
+    'Popcorn ceiling removal & retexture',
   ],
-  'web-build': [
-    'New site build (page or section)',
-    'Component / template development',
-    'Content migration',
-    'Form & notification setup',
-    'Performance & technical review (metadata, structure, analytics)',
+  'frame-interior': [
+    'Interior partition wall framing',
+    'Closet framing',
+    'Soffit / bulkhead framing',
+    'Bathroom framing',
+    'Home office partition',
   ],
-  'web-care': [
-    'Plugin / theme / core updates',
-    'Security patches & small fixes',
-    'Content edits & minor layout changes',
-    'Uptime & backup verification',
-    'Broken link / form check',
+  'frame-exterior': [
+    'Exterior load-bearing wall framing',
+    'Garage framing',
+    'Shed framing',
+    'Exterior addition framing',
   ],
-  'email-hosting': [
-    'Microsoft 365 / Google Workspace migration',
-    'Mailbox cutover & DNS transition',
-    'Shared mailbox / distribution groups',
-    'SPF / DKIM / DMARC implementation',
-    'Mobile device setup',
+  'frame-basement': [
+    'Full basement framing',
+    'Basement bedroom framing',
+    'Basement bathroom framing',
+    'Utility room framing',
   ],
-  'hosting-dns': [
-    'DNS zone changes & verification',
-    'SSL certificate setup / renewal',
-    'Hosting or CDN migration',
-    'Domain registrar & DNS cleanup',
-    'Caching & performance basics',
+  'frame-addition': [
+    'Room addition framing',
+    'Second storey addition framing',
+    'Sunroom / extension framing',
   ],
-  'web-ecom': [
-    'Product catalog & checkout setup',
-    'Payment gateway configuration & testing',
-    'Tax, shipping & order notifications',
-    'Email receipts & accounting handoff',
-    'Basic integration with POS or accounting',
+  'steel-stud': [
+    'Steel stud partition wall',
+    'Commercial steel stud framing',
+    'Ceiling grid / drop ceiling framing',
+  ],
+  'floor-hardwood': [
+    'Solid hardwood installation',
+    'Engineered hardwood installation',
+    'Floating hardwood installation',
+    'Glue-down hardwood installation',
+    'Stair nosing & landing',
+  ],
+  'floor-laminate': [
+    'Laminate flooring installation (room)',
+    'Laminate flooring installation (full unit)',
+    'Laminate stair installation',
+    'Underlay & laminate installation',
+  ],
+  'floor-vinyl': [
+    'Vinyl plank / LVP installation (room)',
+    'Vinyl plank / LVP installation (full unit)',
+    'Waterproof LVP (bathroom / kitchen)',
+    'Glue-down vinyl installation',
+  ],
+  'floor-tile': [
+    'Ceramic floor tile installation',
+    'Porcelain floor tile installation',
+    'Large format tile installation',
+    'Heated floor tile installation',
+    'Mudroom / entryway tile',
+  ],
+  'floor-carpet': [
+    'Carpet installation (room)',
+    'Carpet installation (basement)',
+    'Carpet installation (stairs)',
+    'Carpet stretching & repair',
+  ],
+  'floor-subfloor': [
+    'Subfloor repair & replacement',
+    'Floor leveling compound',
+    'Squeaky floor repair',
+    'Plywood subfloor installation',
+  ],
+  'floor-refinish': [
+    'Hardwood sanding & refinishing',
+    'Hardwood staining & refinishing',
+    'Spot refinishing & blending',
+    'Screen & recoat',
+  ],
+  'tile-bathroom': [
+    'Full bathroom floor & wall tile',
+    'Bathroom floor tile only',
+    'Bathroom wall tile only',
+    'Vanity backsplash tile',
+  ],
+  'tile-kitchen': [
+    'Kitchen backsplash tile installation',
+    'Full kitchen wall tile',
+    'Island backsplash tile',
+  ],
+  'tile-shower': [
+    'Full shower tile installation',
+    'Tub surround tile installation',
+    'Walk-in shower tile',
+    'Niche & bench tile',
+    'Steam shower tile',
+  ],
+  'tile-repair': [
+    'Cracked tile replacement',
+    'Grout repair & regrouting',
+    'Grout cleaning & sealing',
+    'Loose tile re-adhesion',
+  ],
+  'tile-outdoor': [
+    'Outdoor patio tile installation',
+    'Pool surround tile',
+    'Front walkway tile',
+    'Frost-resistant outdoor tile',
+  ],
+  'demo-interior': [
+    'Full interior room demolition',
+    'Kitchen demolition',
+    'Bathroom demolition',
+    'Basement demolition',
+  ],
+  'demo-drywall': [
+    'Drywall removal (single room)',
+    'Drywall removal (full unit)',
+    'Ceiling drywall removal',
+    'Drywall removal & haul away',
+  ],
+  'demo-flooring': [
+    'Hardwood flooring removal',
+    'Tile flooring removal',
+    'Carpet removal & disposal',
+    'Vinyl / linoleum removal',
+    'Subfloor removal',
+  ],
+  'demo-kitchen': [
+    'Full kitchen demo & haul away',
+    'Cabinet removal',
+    'Countertop removal',
+    'Kitchen appliance disconnection & removal',
+  ],
+  'demo-concrete': [
+    'Concrete floor breaking',
+    'Concrete wall removal',
+    'Concrete driveway breaking',
+    'Concrete haul away',
+  ],
+  'deck-build': [
+    'Pressure treated deck build',
+    'Composite deck build',
+    'Cedar deck build',
+    'Multi-level deck construction',
+    'Deck with stairs & railing',
+    'Ground-level deck build',
+  ],
+  'deck-repair': [
+    'Deck board replacement',
+    'Deck stringer / joist repair',
+    'Deck post & footing repair',
+    'Full deck refinishing & seal',
+    'Railing repair & replacement',
+  ],
+  'fence-install': [
+    'Wood privacy fence installation',
+    'Chain link fence installation',
+    'Vinyl fence installation',
+    'Aluminum fence installation',
+    'Gate installation',
+  ],
+  'fence-repair': [
+    'Fence board replacement',
+    'Post replacement',
+    'Gate repair',
+    'Fence straightening & re-leveling',
+  ],
+  'pergola': [
+    'Freestanding pergola build',
+    'Attached pergola build',
+    'Gazebo construction',
+    'Shade structure / awning framing',
+  ],
+  'roof-shingles': [
+    'Full shingle roof replacement',
+    'Partial shingle replacement',
+    'Shingle roof installation (new build)',
+    'Ice & water shield installation',
+  ],
+  'roof-repair': [
+    'Leak repair',
+    'Flashing repair & replacement',
+    'Shingle repair (blown / damaged)',
+    'Skylight flashing repair',
+    'Valley repair',
+  ],
+  'roof-flat': [
+    'Flat roof membrane installation',
+    'TPO membrane installation',
+    'Rubber roof installation',
+    'Flat roof repair & patching',
+  ],
+  'eaves-install': [
+    'Full eavestrough replacement',
+    'Seamless eavestrough installation',
+    'Downspout installation',
+    'Leaf guard / gutter guard installation',
+  ],
+  'eaves-repair': [
+    'Eavestrough cleaning',
+    'Eavestrough leak repair',
+    'Downspout repair & reattachment',
+    'Eavestrough realignment',
+  ],
+  'soffit-fascia': [
+    'Soffit installation (vented)',
+    'Fascia board replacement',
+    'Full soffit & fascia replacement',
+    'Aluminum soffit & fascia cladding',
+  ],
+  'window-install': [
+    'Single window installation',
+    'Multiple window replacement',
+    'Bay / bow window installation',
+    'Egress window installation',
+    'Window trim & casing finishing',
+  ],
+  'door-install': [
+    'Interior door installation',
+    'Exterior entry door installation',
+    'Sliding patio door installation',
+    'French door installation',
+    'Pocket door installation',
+    'Barn door installation',
+  ],
+  'door-trim': [
+    'Door casing & trim installation',
+    'Window casing & apron installation',
+    'Threshold & weatherstrip installation',
+  ],
+  'caulk-seal': [
+    'Window & door caulking',
+    'Bathroom caulking & resealing',
+    'Exterior caulking & weatherproofing',
+    'Expansion joint sealing',
+  ],
+  'insul-batt': [
+    'Wall batt insulation (full room)',
+    'Attic batt insulation',
+    'Basement wall insulation',
+    'Crawl space insulation',
+  ],
+  'insul-spray': [
+    'Spray foam rim joist insulation',
+    'Spray foam wall cavities',
+    'Spray foam attic sealing',
+    'Open cell spray foam application',
+    'Closed cell spray foam application',
+  ],
+  'insul-rigid': [
+    'Rigid board exterior insulation',
+    'Basement rigid board insulation',
+    'Under-slab rigid insulation',
+  ],
+  'vapour-barrier': [
+    'Vapour barrier installation (walls)',
+    'Vapour barrier installation (ceiling)',
+    'Crawl space vapour barrier',
+    'Basement vapour barrier',
+  ],
+  'concrete-pour': [
+    'Concrete slab pour',
+    'Driveway concrete pour',
+    'Sidewalk / walkway pour',
+    'Garage floor pour',
+    'Footing pour',
+  ],
+  'concrete-repair': [
+    'Concrete crack repair',
+    'Driveway resurfacing',
+    'Concrete leveling',
+    'Spalling concrete repair',
+  ],
+  'brick-install': [
+    'Brick veneer installation',
+    'Retaining wall block installation',
+    'Garden wall / raised bed',
+    'Exterior brick laying',
+  ],
+  'mortar-repair': [
+    'Tuckpointing (repointing)',
+    'Chimney mortar repair',
+    'Foundation mortar repair',
+    'Brick & mortar restoration',
+  ],
+  'interlock': [
+    'Interlock driveway installation',
+    'Interlock patio installation',
+    'Interlock walkway installation',
+    'Paving stone repair & resetting',
+  ],
+  'trim-baseboard': [
+    'Baseboard installation (room)',
+    'Baseboard installation (full unit)',
+    'Door & window casing installation',
+    'Baseboard removal & replacement',
+  ],
+  'trim-crown': [
+    'Crown moulding installation (room)',
+    'Crown moulding installation (full unit)',
+    'Crown moulding on kitchen cabinets',
+    'Coffered ceiling trim',
+  ],
+  'trim-wainscot': [
+    'Wainscoting installation',
+    'Shiplap wall panel installation',
+    'Board & batten installation',
+    'Feature wall paneling',
+  ],
+  'shelving': [
+    'Custom closet shelving',
+    'Pantry shelving',
+    'Garage shelving',
+    'Built-in bookcase',
+    'Floating shelf installation',
+  ],
+  'stair-rail': [
+    'Stair railing installation',
+    'Baluster replacement',
+    'Handrail installation',
+    'Glass railing installation',
+    'Newel post installation',
+  ],
+  'labour-general': [
+    'General renovation labour',
+    'Material handling & staging',
+    'Site preparation',
+    'Miscellaneous labour',
+  ],
+  'labour-cleanup': [
+    'Post-renovation cleanup',
+    'Debris removal & haul away',
+    'Dumpster loading',
+    'Final site broom clean',
+  ],
+  'labour-supervision': [
+    'Project management & scheduling',
+    'Subcontractor coordination',
+    'Site inspection & quality control',
+    'Permit application coordination',
+  ],
+  'labour-emergency': [
+    'Emergency water damage response',
+    'Emergency structural repair',
+    'Emergency roof repair',
+    'After-hours emergency call',
   ],
 };
 
 // ── Material presets for line-item autocomplete ───────────────────────────────
 const MATERIAL_PRESETS = [
+  // Drywall
   { label: 'Drywall Sheet 4x8', price: 18 },
   { label: 'Drywall Sheet 4x12', price: 22 },
+  { label: 'Moisture-Resistant Drywall 4x8', price: 28 },
+  { label: 'Fire-Rated Drywall 4x8', price: 32 },
   { label: 'Drywall Screws (1 lb box)', price: 14 },
   { label: 'Joint Compound (pail)', price: 28 },
   { label: 'Drywall Tape (roll)', price: 9 },
   { label: 'Corner Bead', price: 12 },
+  { label: 'Metal Corner Bead', price: 8 },
 
+  // Painting
   { label: 'Interior Paint (1 gallon)', price: 55 },
   { label: 'Exterior Paint (1 gallon)', price: 65 },
   { label: 'Primer (1 gallon)', price: 45 },
+  { label: 'Deck Stain (1 gallon)', price: 60 },
+  { label: 'Cabinet Paint (1 quart)', price: 45 },
+  { label: 'Epoxy Floor Paint (kit)', price: 120 },
   { label: 'Caulking Tube', price: 7 },
   { label: "Painter's Tape", price: 8 },
   { label: 'Paint Roller Kit', price: 18 },
   { label: 'Brush Set', price: 15 },
   { label: 'Drop Sheets', price: 12 },
+  { label: 'Paint Tray & Liners', price: 10 },
 
-  { label: 'Ceramic Tile (sq ft)', price: 6 },
-  { label: 'Porcelain Tile (sq ft)', price: 7 },
-  { label: 'Tile Adhesive (bag)', price: 35 },
-  { label: 'Grout (bag)', price: 25 },
-  { label: 'Floor Leveler (bag)', price: 40 },
+  // Flooring
+  { label: 'Hardwood Flooring (sq ft)', price: 8 },
+  { label: 'Engineered Hardwood (sq ft)', price: 6 },
   { label: 'Laminate Flooring (sq ft)', price: 4 },
-  { label: 'Vinyl Plank Flooring (sq ft)', price: 5 },
+  { label: 'Vinyl Plank / LVP (sq ft)', price: 5 },
+  { label: 'Carpet (sq ft)', price: 4 },
+  { label: 'Carpet Underlay (sq ft)', price: 1 },
+  { label: 'Flooring Underlay (roll)', price: 45 },
+  { label: 'Transition Strip', price: 18 },
+  { label: 'Floor Leveler (bag)', price: 40 },
+  { label: 'Subfloor Plywood (sheet)', price: 38 },
 
-  { label: 'Cleaning Supplies', price: 30 },
-  { label: 'Garbage Bags (Contractor box)', price: 25 },
-  { label: 'Rags / Towels', price: 12 },
-  { label: 'Shop Towels', price: 15 },
-  { label: 'Broom / Dustpan', price: 20 },
-  { label: 'Disinfectant / Chemicals', price: 18 },
+  // Tile
+  { label: 'Ceramic Tile (sq ft)', price: 6 },
+  { label: 'Porcelain Tile (sq ft)', price: 9 },
+  { label: 'Large Format Tile (sq ft)', price: 14 },
+  { label: 'Mosaic Tile (sheet)', price: 22 },
+  { label: 'Subway Tile (sq ft)', price: 8 },
+  { label: 'Outdoor / Frost-Resistant Tile (sq ft)', price: 12 },
+  { label: 'Tile Adhesive / Thinset (bag)', price: 35 },
+  { label: 'Grout (bag)', price: 25 },
+  { label: 'Tile Spacers (bag)', price: 8 },
+  { label: 'Grout Sealer', price: 18 },
+  { label: 'Waterproof Membrane (roll)', price: 65 },
+  { label: 'Schluter / Edge Trim', price: 20 },
 
+  // Lumber & Framing
+  { label: '2x4 Lumber (8 ft)', price: 7 },
+  { label: '2x4 Lumber (10 ft)', price: 9 },
+  { label: '2x6 Lumber (8 ft)', price: 10 },
+  { label: '2x6 Lumber (10 ft)', price: 13 },
+  { label: '2x8 Lumber', price: 16 },
+  { label: '2x10 Lumber', price: 20 },
+  { label: 'Pressure Treated Lumber (2x4)', price: 12 },
+  { label: 'Pressure Treated Lumber (2x6)', price: 16 },
+  { label: 'Plywood Sheet (3/4")', price: 55 },
+  { label: 'Plywood Sheet (1/2")', price: 42 },
+  { label: 'OSB Board (7/16")', price: 30 },
+  { label: 'LVL Beam', price: 85 },
+  { label: 'Steel Stud (10 ft)', price: 10 },
+  { label: 'Track / Runner (10 ft)', price: 8 },
+
+  // Trim & Moulding
+  { label: 'Baseboard Moulding (8 ft)', price: 12 },
+  { label: 'Crown Moulding (8 ft)', price: 18 },
+  { label: 'Door Casing (set)', price: 22 },
+  { label: 'Window Casing (set)', price: 20 },
+  { label: 'Shiplap / Board (8 ft)', price: 14 },
+  { label: 'Quarter Round (8 ft)', price: 6 },
+
+  // Decking & Fencing
+  { label: 'Composite Decking (sq ft)', price: 12 },
+  { label: 'Pressure Treated Decking (sq ft)', price: 6 },
+  { label: 'Cedar Decking (sq ft)', price: 9 },
+  { label: 'Deck Post (4x4 PT)', price: 18 },
+  { label: 'Deck Post (6x6 PT)', price: 28 },
+  { label: 'Joist Hanger', price: 4 },
+  { label: 'Deck Screws (box)', price: 22 },
+  { label: 'Post Base / Bracket', price: 18 },
+  { label: 'Fence Board (6 ft)', price: 8 },
+  { label: 'Fence Post (4x4)', price: 14 },
+
+  // Roofing
+  { label: 'Shingles Bundle', price: 55 },
+  { label: 'Ice & Water Shield (roll)', price: 85 },
+  { label: 'Roofing Felt / Underlayment (roll)', price: 40 },
+  { label: 'Roofing Nails', price: 14 },
+  { label: 'Ridge Cap (bundle)', price: 45 },
+  { label: 'Drip Edge (10 ft)', price: 12 },
+  { label: 'Flashing (roll)', price: 25 },
+  { label: 'Eavestrough (10 ft)', price: 18 },
+  { label: 'Downspout (10 ft)', price: 14 },
+  { label: 'Downspout Elbow', price: 8 },
+  { label: 'Gutter Guard (10 ft)', price: 12 },
+
+  // Insulation
+  { label: 'Batt Insulation R20 (bag)', price: 55 },
+  { label: 'Batt Insulation R12 (bag)', price: 40 },
+  { label: 'Rigid Foam Board 2" (sheet)', price: 28 },
+  { label: 'Vapour Barrier (roll)', price: 45 },
+
+  // Concrete & Masonry
+  { label: 'Concrete Mix (bag)', price: 8 },
+  { label: 'Mortar Mix (bag)', price: 10 },
+  { label: 'Rebar (10 ft)', price: 12 },
+  { label: 'Wire Mesh (sheet)', price: 18 },
+  { label: 'Interlock Paving Stone (each)', price: 3 },
+  { label: 'Retaining Wall Block (each)', price: 5 },
+
+  // Fasteners & Adhesives
   { label: 'Nails (box)', price: 12 },
   { label: 'Wood Screws (box)', price: 15 },
+  { label: 'Drywall Screws (box)', price: 14 },
+  { label: 'Lag Bolts / Structural Screws', price: 22 },
   { label: 'Anchors / Fasteners', price: 18 },
   { label: 'Construction Adhesive', price: 9 },
   { label: 'Silicone Sealant', price: 8 },
   { label: 'Expanding Foam', price: 14 },
+  { label: 'Acoustic Sealant', price: 12 },
 
-  { label: '2x4 Lumber', price: 7 },
-  { label: '2x6 Lumber', price: 10 },
-  { label: 'Plywood Sheet', price: 38 },
-  { label: 'OSB Board', price: 30 },
-  { label: 'Pressure Treated Lumber', price: 12 },
-  { label: 'Trim / Moulding', price: 20 },
-
+  // Electrical (supply only)
   { label: 'Electrical Wire (roll)', price: 60 },
   { label: 'Outlet / Receptacle', price: 6 },
   { label: 'Light Switch', price: 5 },
   { label: 'Junction Box', price: 8 },
   { label: 'LED Light Fixture', price: 45 },
+  { label: 'Pot Light (each)', price: 25 },
   { label: 'Breaker / Panel Part', price: 35 },
 
-  { label: 'PVC Pipe', price: 12 },
-  { label: 'PEX Pipe', price: 15 },
+  // Plumbing (supply only)
+  { label: 'PVC Pipe (10 ft)', price: 12 },
+  { label: 'PEX Pipe (10 ft)', price: 15 },
   { label: 'Pipe Fittings', price: 10 },
   { label: 'Plumbing Sealant / Tape', price: 6 },
   { label: 'Shutoff Valve', price: 18 },
+  { label: 'P-Trap', price: 14 },
 
-  { label: 'Shingles Bundle', price: 45 },
-  { label: 'Roofing Nails', price: 14 },
-  { label: 'Eavestrough Materials', price: 85 },
-  { label: 'Flashing', price: 20 },
-  { label: 'Waterproof Membrane', price: 50 },
-
-  { label: 'Equipment Rental (per day)', price: 120 },
-  { label: 'Delivery / Pickup', price: 60 },
-  { label: 'Dump Fees', price: 90 },
-  { label: 'Permit Fees', price: 180 },
+  // Cleanup & Misc
+  { label: 'Cleaning Supplies', price: 30 },
+  { label: 'Garbage Bags (Contractor box)', price: 25 },
+  { label: 'Shop Towels', price: 15 },
+  { label: 'Safety Equipment (PPE)', price: 35 },
+  { label: 'Equipment Rental (per day)', price: 150 },
+  { label: 'Tool Consumables', price: 30 },
+  { label: 'Delivery / Pickup', price: 75 },
+  { label: 'Dump Fees', price: 110 },
+  { label: 'Permit Fees', price: 200 },
   { label: 'Labour Adjustment / Misc', price: 50 },
 ];
 
@@ -236,7 +698,6 @@ function DescriptionAutocomplete({ value, onChange, onSelect }) {
   const [recents, setRecents] = useState(loadRecents);
   const wrapRef = useRef(null);
 
-  // Close on outside click
   useEffect(() => {
     const handler = (e) => {
       if (wrapRef.current && !wrapRef.current.contains(e.target)) setOpen(false);
@@ -251,7 +712,6 @@ function DescriptionAutocomplete({ value, onChange, onSelect }) {
     ? MATERIAL_PRESETS.filter((p) => p.label.toLowerCase().includes(query)).slice(0, 8)
     : [];
 
-  // Recents shown when field is focused but nothing typed yet
   const showRecents = open && query.length < 2 && recents.length > 0;
   const showMatches = open && filteredPresets.length > 0;
   const isOpen = showRecents || showMatches;
@@ -271,7 +731,7 @@ function DescriptionAutocomplete({ value, onChange, onSelect }) {
       <input
         type="text"
         className="form-input"
-        placeholder="Fixed fee, materials, license, etc."
+        placeholder="Materials, fixed fee, rental, etc."
         value={value}
         autoComplete="off"
         onChange={(e) => { onChange(e.target.value); setOpen(true); }}
@@ -301,7 +761,7 @@ function DescriptionAutocomplete({ value, onChange, onSelect }) {
             <>
               {showRecents && <div className="suggestions-divider" />}
               <div className="suggestions-group-label">
-                <i className="fas fa-box"></i> Materials
+                <i className="fas fa-box"></i> Materials & Supplies
               </div>
               {filteredPresets.map((p) => (
                 <button
@@ -373,7 +833,6 @@ const ServiceCalculator = forwardRef(function ServiceCalculator(_, ref) {
   const updateLineItem = (id, field, value) =>
     setLineItems((p) => p.map((i) => (i.id !== id ? i : { ...i, [field]: value })));
 
-  // Called when user clicks a material suggestion for a line item
   const applyMaterialPreset = (id, preset) => {
     setLineItems((p) =>
       p.map((i) =>
@@ -486,7 +945,7 @@ const ServiceCalculator = forwardRef(function ServiceCalculator(_, ref) {
   return (
     <div className="service-calc-card">
       <div className="card-title">
-        <i className="fas fa-cogs"></i> Services
+        <i className="fas fa-hard-hat"></i> Services
       </div>
 
       <div className="services-sublabel">
@@ -566,7 +1025,7 @@ const ServiceCalculator = forwardRef(function ServiceCalculator(_, ref) {
                 <input
                   type="text"
                   className="form-input"
-                  placeholder="e.g. ticket #, tenant name, scope notes"
+                  placeholder="e.g. room name, floor level, scope notes"
                   value={s.notes}
                   onChange={(e) => updateHourly(s.id, 'notes', e.target.value)}
                 />
@@ -588,7 +1047,7 @@ const ServiceCalculator = forwardRef(function ServiceCalculator(_, ref) {
       })}
 
       <div className="services-sublabel" style={{ marginTop: '28px' }}>
-        <i className="fas fa-list"></i> Line Items
+        <i className="fas fa-list"></i> Line Items (Materials & Fixed Costs)
       </div>
 
       {lineItems.map((item) => (
