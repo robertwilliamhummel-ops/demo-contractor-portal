@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
-import { signOut } from 'firebase/auth';
-import { collection, query, getDocs } from 'firebase/firestore';
-import { auth, db } from '../config/firebase';
+import { collection, query, where, getDocs } from 'firebase/firestore';
+import { db } from '../config/firebase';
 import clientConfig from '../config/client';
 import InvoiceList from './InvoiceList';
 import InvoiceForm from './InvoiceForm';
@@ -33,8 +32,8 @@ function AdminDashboard({ user }) {
   const fetchStats = async () => {
     try {
       const [invSnap, quoteSnap] = await Promise.all([
-        getDocs(query(collection(db, 'invoices'))),
-        getDocs(query(collection(db, 'quotes'))),
+        getDocs(query(collection(db, 'invoices'), where('userId', '==', user.uid))),
+        getDocs(query(collection(db, 'quotes'),   where('userId', '==', user.uid))),
       ]);
 
       let totalRevenue = 0;
@@ -60,14 +59,6 @@ function AdminDashboard({ user }) {
       });
     } catch (err) {
       console.error('Stats fetch error:', err);
-    }
-  };
-
-  const handleSignOut = async () => {
-    try {
-      await signOut(auth);
-    } catch (err) {
-      console.error('Sign out error:', err);
     }
   };
 
@@ -101,11 +92,8 @@ function AdminDashboard({ user }) {
           </div>
           <div className="header-right">
             <span className="user-email">
-              <i className="fas fa-user-circle"></i> {user.email}
+              <i className="fas fa-user-circle"></i> Demo Mode
             </span>
-            <button className="signout-btn" onClick={handleSignOut}>
-              <i className="fas fa-sign-out-alt"></i> Sign Out
-            </button>
           </div>
         </div>
 

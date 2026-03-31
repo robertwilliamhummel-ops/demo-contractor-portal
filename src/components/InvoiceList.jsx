@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { collection, query, getDocs, doc, updateDoc } from 'firebase/firestore';
+import { collection, query, where, getDocs, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import './InvoiceList.css';
 
@@ -22,7 +22,8 @@ function InvoiceList({ user, onCreateNew }) {
     setError('');
     try {
       const q = query(
-        collection(db, 'invoices')
+        collection(db, 'invoices'),
+        where('userId', '==', user.uid)
       );
       const snapshot = await getDocs(q);
       const list = [];
