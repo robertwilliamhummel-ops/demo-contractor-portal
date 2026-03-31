@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { signOut } from 'firebase/auth';
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import { collection, query, getDocs } from 'firebase/firestore';
 import { auth, db } from '../config/firebase';
 import clientConfig from '../config/client';
 import InvoiceList from './InvoiceList';
@@ -11,36 +11,10 @@ import MobileTabs from './MobileTabs';
 import FloatingActionButton from './FloatingActionButton';
 import './AdminDashboard.css';
 
-/*
- * AdminDashboard — responsive navigation strategy
- * ─────────────────────────────────────────────────────────────────────────
- * DESKTOP (≥ 768 px):
- *   The existing 4-button `.admin-tabs` nav inside the header is shown normally.
- *   MobileTabs and FloatingActionButton are NOT rendered — zero DOM impact.
- *
- * MOBILE (< 768 px):
- *   • `.admin-tabs` nav is hidden via CSS (`.admin-tabs--desktop-only`).
- *   • <MobileTabs> is rendered as the first child of <main>, position sticky.
- *     – In list mode it shows "Invoices | Quotes" tabs.
- *     – In create mode it shows a Back button + form title.
- *   • <FloatingActionButton> is fixed to the bottom-right corner.
- *     – Context-aware: tapping it switches to 'create-invoice' or 'create-quote'
- *       depending on which list is currently active.
- *     – Automatically disappears when a create form is open.
- *
- * isMobile detection uses window.matchMedia so it responds to live resizing
- * (e.g. DevTools responsive mode) without a page reload.
- *
- * GUARDRAIL: All Firestore queries and useEffects are 100 % unchanged from
- * the original. No state variable has been renamed. New state variables added:
- *   • isMobile (boolean)
- * ─────────────────────────────────────────────────────────────────────────
- */
 function AdminDashboard({ user }) {
   const [activeTab, setActiveTab] = useState('invoices');
   const [stats, setStats]         = useState(null);
 
-  // ── Responsive detection ──────────────────────────────────────────────────
   const [isMobile, setIsMobile] = useState(
     () => window.matchMedia('(max-width: 767px)').matches
   );
@@ -52,7 +26,6 @@ function AdminDashboard({ user }) {
     return () => mq.removeEventListener('change', handler);
   }, []);
 
-  // ── Stats fetch — UNCHANGED ───────────────────────────────────────────────
   useEffect(() => {
     fetchStats();
   }, [user]);
@@ -60,8 +33,8 @@ function AdminDashboard({ user }) {
   const fetchStats = async () => {
     try {
       const [invSnap, quoteSnap] = await Promise.all([
-        getDocs(query(collection(db, 'invoices'), where('userId', '==', user.uid))),
-        getDocs(query(collection(db, 'quotes'),   where('userId', '==', user.uid))),
+        getDocs(query(collection(db, 'invoices'))),
+        getDocs(query(collection(db, 'quotes'))),
       ]);
 
       let totalRevenue = 0;
@@ -101,21 +74,16 @@ function AdminDashboard({ user }) {
   const formatCurrency = (amount) =>
     new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD' }).format(amount || 0);
 
-  // ── Mobile FAB handler ────────────────────────────────────────────────────
-  // Tapping the FAB opens the create form that matches the current list view.
   const handleFabAction = () => {
     if (activeTab === 'invoices') setActiveTab('create-invoice');
     if (activeTab === 'quotes')   setActiveTab('create-quote');
   };
 
-  // ── MobileTabs handler ────────────────────────────────────────────────────
-  // Handles both tab switches (list mode) and back-navigation (create mode).
   const handleTabChange = (tab) => setActiveTab(tab);
 
   return (
     <div className="admin-dashboard">
 
-      {/* ── Header ─────────────────────────────────────────────────────────── */}
       <header className="admin-header">
         <div className="admin-header-top">
           <div className="header-left">
@@ -141,7 +109,6 @@ function AdminDashboard({ user }) {
           </div>
         </div>
 
-        {/* Summary Stats Bar — unchanged, shown on both mobile and desktop */}
         {stats && (
           <div className="admin-stats-bar">
             <div className="stats-bar-item">
@@ -175,13 +142,6 @@ function AdminDashboard({ user }) {
           </div>
         )}
 
-        {/*
-         * Desktop nav tabs — UNCHANGED layout and behaviour.
-         * Hidden on mobile via the `admin-tabs--desktop-only` class
-         * (CSS: display:none at < 768 px).
-         * We add the modifier class rather than touching the original
-         * `admin-tabs` selector so existing CSS is completely unaffected.
-         */}
         <nav className="admin-tabs admin-tabs--desktop-only">
           <button
             className={`admin-tab ${activeTab === 'invoices' ? 'active' : ''}`}
@@ -210,20 +170,12 @@ function AdminDashboard({ user }) {
         </nav>
       </header>
 
-      {/* ── Main content ───────────────────────────────────────────────────── */}
       <main className="admin-main">
 
-        {/*
-         * Mobile sticky tab bar — only mounted when isMobile is true.
-         * Positioned as the first child of main so `position:sticky; top:0`
-         * keeps it pinned at the top of the viewport during vertical scroll.
-         * Never rendered on desktop — zero layout impact.
-         */}
         {isMobile && (
           <MobileTabs activeTab={activeTab} onTabChange={handleTabChange} />
         )}
 
-        {/* ── Content panels — UNCHANGED ─────────────────────────────────── */}
         {activeTab === 'invoices' && (
           <InvoiceList
             user={user}
@@ -254,13 +206,6 @@ function AdminDashboard({ user }) {
 
       </main>
 
-      {/*
-       * Floating Action Button — only mounted when isMobile is true.
-       * Fixed to the bottom-right corner, z-index 200.
-       * The FAB component itself returns null when activeTab is a create form,
-       * so we never need to conditionally render it here based on activeTab.
-       * Never rendered on desktop — zero layout impact.
-       */}
       {isMobile && (
         <FloatingActionButton
           activeTab={activeTab}

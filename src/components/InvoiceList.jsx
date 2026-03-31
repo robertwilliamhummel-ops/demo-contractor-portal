@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { collection, query, where, getDocs, doc, updateDoc } from 'firebase/firestore';
+import { collection, query, getDocs, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import './InvoiceList.css';
 
@@ -22,8 +22,7 @@ function InvoiceList({ user, onCreateNew }) {
     setError('');
     try {
       const q = query(
-        collection(db, 'invoices'),
-        where('userId', '==', user.uid)
+        collection(db, 'invoices')
       );
       const snapshot = await getDocs(q);
       const list = [];
@@ -31,7 +30,6 @@ function InvoiceList({ user, onCreateNew }) {
         list.push({ id: doc.id, ...doc.data() });
       });
 
-      // Default sort newest first
       list.sort((a, b) => {
         const dateA = a.createdAt?.toDate?.() || new Date(a.date);
         const dateB = b.createdAt?.toDate?.() || new Date(b.date);
@@ -75,13 +73,11 @@ function InvoiceList({ user, onCreateNew }) {
     }).format(amount || 0);
   };
 
-  // Derive available years from data
   const availableYears = useMemo(() => {
     const years = new Set(invoices.map(inv => inv.date?.slice(0, 4)).filter(Boolean));
     return Array.from(years).sort((a, b) => b - a);
   }, [invoices]);
 
-  // Filter + search + sort
   const filtered = useMemo(() => {
     let list = invoices.filter(inv => {
       const matchesFilter = filter === 'all' || inv.status === filter;
@@ -115,7 +111,6 @@ function InvoiceList({ user, onCreateNew }) {
     return list;
   }, [invoices, filter, search, yearFilter, sortBy]);
 
-  // Stats
   const totalRevenue = invoices.filter(i => i.status === 'paid').reduce((s, i) => s + (i.totals?.finalTotal || 0), 0);
   const outstanding = invoices.filter(i => i.status === 'unpaid').reduce((s, i) => s + (i.totals?.finalTotal || 0), 0);
   const paidCount = invoices.filter(i => i.status === 'paid').length;
@@ -130,7 +125,6 @@ function InvoiceList({ user, onCreateNew }) {
   return (
     <div className="invoice-list-admin">
 
-      {/* Stats Cards */}
       <div className="admin-stats">
         <div className="stat-card">
           <div className="stat-icon"><i className="fas fa-file-invoice"></i></div>
@@ -154,7 +148,6 @@ function InvoiceList({ user, onCreateNew }) {
         </div>
       </div>
 
-      {/* Outstanding Banner */}
       {unpaidCount > 0 && (
         <div className="outstanding-banner">
           <span>
@@ -167,7 +160,6 @@ function InvoiceList({ user, onCreateNew }) {
         </div>
       )}
 
-      {/* Filters + Sort + Search */}
       <div className="list-controls">
         <div className="filter-buttons">
           {['all', 'unpaid', 'paid', 'cancelled'].map(f => (
@@ -215,7 +207,6 @@ function InvoiceList({ user, onCreateNew }) {
         </div>
       </div>
 
-      {/* Table */}
       <div className="invoices-table">
         <div className="table-header">
           <span>Invoice #</span>
@@ -279,7 +270,6 @@ function InvoiceList({ user, onCreateNew }) {
         ))}
       </div>
 
-      {/* Footer */}
       {!loading && (
         <div className="list-footer">
           <button className="btn-refresh" onClick={fetchInvoices}>
